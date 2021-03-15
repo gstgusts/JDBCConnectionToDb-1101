@@ -10,10 +10,10 @@ public class Main {
 //            System.out.println(region.getName());
 //        }
 
-        var dl = new DataLoader();
-        var counties = dl.load();
-
-        dm.addCounties(counties);
+//        var dl = new DataLoader();
+//        var counties = dl.load();
+//
+//        dm.addCounties(counties);
 
     }
 }

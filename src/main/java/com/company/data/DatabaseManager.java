@@ -34,6 +34,30 @@ public class DatabaseManager {
         return items;
     }
 
+    public List<County> getCounties() {
+        List<County> items = new ArrayList<>();
+
+        try {
+            var con = getConnection();
+            var stmt = con.createStatement();
+            var rs = stmt.executeQuery("select * from county");
+
+            while (rs.next()) {
+
+                var county = new County(rs.getInt("county_id"),
+                        rs.getString("county_name"),
+                        new Region(rs.getInt("county_region_id"),""));
+
+                items.add(county);
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return items;
+    }
+
     public void addCounties(List<County> counties) {
         Connection con = null;
         try {
@@ -43,13 +67,50 @@ public class DatabaseManager {
                         "insert into county (county_name, county_region_id) values (?, ?)");
 
                 insertCounties.setString(1, county.getName());
-                insertCounties.setInt(2, county.getRegionId());
+                insertCounties.setInt(2, county.getRegion().getId());
 
                 insertCounties.executeUpdate();
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+    public Integer addCity(City city) {
+        Connection con = null;
+        try {
+            con = getConnection();
+
+            var insertCity = con.prepareStatement(
+                    "insert into city (city_name, city_founded, city_region_id, city_county_id) values (?, ?, ?, ?)");
+
+            insertCity.setString(1, city.getName());
+
+            if(city.getFounded() != null) {
+                insertCity.setInt(2, city.getFounded());
+            } else {
+                insertCity.setNull(2, java.sql.Types.INTEGER);
+            }
+
+            if(city.getRegion() != null) {
+                insertCity.setInt(3, city.getRegion().getId());
+            } else {
+                insertCity.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            if(city.getCounty() != null) {
+                insertCity.setInt(4, city.getCounty().getId());
+            } else {
+                insertCity.setNull(4, java.sql.Types.INTEGER);
+            }
+
+            return insertCity.executeUpdate();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return null;
     }
 
     private Connection getConnection() throws SQLException {
