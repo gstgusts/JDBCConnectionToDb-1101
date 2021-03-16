@@ -3,7 +3,10 @@ import com.company.data.DatabaseManager;
 
 public class Main {
     public static void main(String[] args) {
-      var dm = new DatabaseManager();
+        var dm = new DatabaseManager();
+        var dl = new DataLoader(dm);
+
+        var allCities = dl.loadCities();
 //
 //        for (var region :
 //                dm.getRegions()) {

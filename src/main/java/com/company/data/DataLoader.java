@@ -52,13 +52,8 @@ public class DataLoader {
             var regions = databaseManager.getRegions();
             var counties = databaseManager.getCounties();
 
-            for (int i = 0; i < lines.size(); i++) {
+            for (int i = 1; i < lines.size(); i++) {
                 String[] columns = lines.get(i).split(",");
-
-                if(i == 0) {
-                     years = getYears(columns);
-                     continue;
-                }
 
                 String cityName = columns[0];
                 String regionName = columns[1];
@@ -85,9 +80,9 @@ public class DataLoader {
 
                 fillPopulation(populations, null, columns);
 
-                City city = new City(0, cityName, region, county, null, null);
+                City city = new City(0, cityName, region, county, null, populations);
 
-
+                var id = databaseManager.addCity(city);
 
                 cities.add(city);
             }
@@ -101,8 +96,8 @@ public class DataLoader {
         Integer year = 1967;
         for (int i = 3; i < columns.length; i++) {
             if(!columns[i].equals("...")) {
-                var population = Integer.getInteger(columns[i]);
-                var popu = new Population(year, population, city);
+                var population = Integer.parseInt(columns[i]);
+                var popu = new Population(0, year, population, city);
                 populations.add(popu);
             }
             ++year;

@@ -6,6 +6,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class Population {
 
+    private Integer id;
     private Integer year;
     private Integer population;
     private City city;

@@ -1,9 +1,6 @@
 package com.company.data;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,7 +79,7 @@ public class DatabaseManager {
             con = getConnection();
 
             var insertCity = con.prepareStatement(
-                    "insert into city (city_name, city_founded, city_region_id, city_county_id) values (?, ?, ?, ?)");
+                    "insert into city (city_name, city_founded, city_region_id, city_county_id) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
             insertCity.setString(1, city.getName());
 
@@ -104,10 +101,61 @@ public class DatabaseManager {
                 insertCity.setNull(4, java.sql.Types.INTEGER);
             }
 
-            return insertCity.executeUpdate();
+            insertCity.executeUpdate();
+
+            Integer id = 0;
+
+            try(ResultSet keys = insertCity.getGeneratedKeys()) {
+                keys.next();
+                id = keys.getInt(1);
+                city.setId(id);
+            }
+
+            con.close();
+
+            for (var population :
+                    city.getPopulation()) {
+                population.setCity(city);
+                addPopulation(population);
+            }
+
+            return id;
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public Integer addPopulation(Population population) {
+        Connection con = null;
+        try {
+            con = getConnection();
+
+            var insertStmt = con.prepareStatement(
+                    "insert into popul (pop_year, pop_number, pop_city_id) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+            insertStmt.setInt(1, population.getYear());
+            insertStmt.setInt(2, population.getPopulation());
+            insertStmt.setInt(3, population.getCity().getId());
+
+            insertStmt.executeUpdate();
+
+            Integer id = 0;
+
+            try(ResultSet keys = insertStmt.getGeneratedKeys()) {
+                keys.next();
+                id = keys.getInt(1);
+                population.setId(id);
+            }
+
+            con.close();
+
+            return id;
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         return null;
