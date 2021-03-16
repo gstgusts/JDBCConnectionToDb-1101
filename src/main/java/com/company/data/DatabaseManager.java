@@ -8,6 +8,25 @@ public class DatabaseManager {
 
     private static final String connectionUrl = "jdbc:mysql://localhost:3306/population?serverTimezone=UTC";
 
+    public List<City> getCities() {
+        List<City> items = new ArrayList<>();
+
+        try {
+            var con = getConnection();
+            var stmt = con.createStatement();
+            var rs = stmt.executeQuery("select * from v_city_full_data");
+
+            while (rs.next()) {
+                items.add(City.create(rs));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return items;
+    }
+
     public List<Region> getRegions() {
         List<Region> items = new ArrayList<>();
 
