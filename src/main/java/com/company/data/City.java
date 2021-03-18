@@ -19,11 +19,14 @@ public class City {
 
     @SneakyThrows
     public static City create(ResultSet rs) {
+
+        var founded = rs.getInt("city_founded");
+
         var city = new City(rs.getInt("city_id"),
                 rs.getString("city_name"),
                 Region.create(rs),
-                null,
-                null,
+                County.create(rs),
+                founded == 0 ? null : founded,
                 new ArrayList<>());
 
         return city;

@@ -2,7 +2,10 @@ package com.company.data;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DatabaseManager {
 
@@ -25,6 +28,77 @@ public class DatabaseManager {
         }
 
         return items;
+    }
+
+    public List<City> getCitiesWithPopulationData() {
+        List<City> items = new ArrayList<>();
+
+        Map<Integer, City> cities = new HashMap<>();
+
+        try {
+            var con = getConnection();
+            var stmt = con.createStatement();
+            var rs = stmt.executeQuery("select * from v_city_with_population");
+
+            while (rs.next()) {
+
+                var cityId = rs.getInt("city_id");
+
+                if(!cities.containsKey(cityId)) {
+                    var city = City.create(rs);
+                    cities.put(cityId, city);
+                }
+
+                var currentCity = cities.get(cityId);
+
+                currentCity.getPopulation().add(Population.create(rs, currentCity));
+            }
+
+            return cities.values().stream().collect(Collectors.toList());
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return items;
+    }
+
+    public City getCityById(int id) {
+        try {
+            var con = getConnection();
+            var stmt = con.prepareStatement("select * from v_city_full_data where city_id = ?");
+
+            stmt.setInt(1, id);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+               return City.create(rs);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public void getPopulationDataForCity(City city) {
+        try {
+            var con = getConnection();
+            var stmt = con.prepareStatement("select * from popul where pop_city_id = ? order by pop_year");
+
+            stmt.setInt(1, city.getId());
+
+            ResultSet rs = stmt.executeQuery();
+
+            city.getPopulation().clear();
+
+            while (rs.next()) {
+                city.getPopulation().add(Population.create(rs, city));
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     public List<Region> getRegions() {
